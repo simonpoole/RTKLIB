@@ -431,9 +431,9 @@ void __fastcall TPlot::ReadMapData(AnsiString file)
     
     try {
         image->LoadFromFile(file);
-    }
-    catch (Exception &exception) {
-        ShowMsg(s.sprintf("map file read error: %s",file));
+	}
+	catch (Exception &exception) {
+        ShowMsg(s.sprintf("map file read error: %s",file.c_str()));
         ShowLegend(NULL);
         return;
     }
@@ -643,7 +643,7 @@ void __fastcall TPlot::ReadSkyData(AnsiString file)
         image->LoadFromFile(file);
     }
     catch (Exception &exception) {
-        ShowMsg(s.sprintf("sky image file read error: %s",file));
+		ShowMsg(s.sprintf("sky image file read error: %s",file.c_str()));
         ShowLegend(NULL);
         return;
     }
@@ -814,8 +814,8 @@ void __fastcall TPlot::SaveWaypoint(AnsiString file)
             fprintf(fp," <ele>%.4f</ele>\n",PntPos[i][2]);
         }
         UTF8String str(PntName[i]);
-        fprintf(fp," <name>%s</name>\n",str); // UTF-8
-        fprintf(fp,"</wpt>\n");
+		fprintf(fp," <name>%s</name>\n",str.c_str()); // UTF-8
+		fprintf(fp,"</wpt>\n");
     }
     fprintf(fp,"%s\n",TAILGPX);
     fclose(fp);
@@ -861,13 +861,13 @@ void __fastcall TPlot::SaveDop(AnsiString file)
     gtime_t time;
     double azel[MAXOBS*2],dop[4],tow;
     int i,j,ns,week;
-    char tstr[64],*tlabel;
-    
+    char tstr[64];
+	const char *tlabel;
     trace(3,"SaveDop: file=%s\n",file.c_str());
     
     if (!(fp=fopen(file.c_str(),"w"))) return;
-    
-    tlabel=TimeLabel<=1?"TIME (GPST)":(TimeLabel<=2?"TIME (UTC)":"TIME (JST)");
+
+	tlabel=TimeLabel<=1?"TIME (GPST)":(TimeLabel<=2?"TIME (UTC)":"TIME (JST)");
     
     fprintf(fp,"%% %-*s %6s %8s %8s %8s %8s (EL>=%.0fdeg)\n",TimeLabel==0?13:19,
             tlabel,"NSAT","GDOP","PDOP","HDOP","VDOP",ElMask);
@@ -912,7 +912,8 @@ void __fastcall TPlot::SaveSnrMp(AnsiString file)
     AnsiString ObsTypeText=ObsType2->Text;
     gtime_t time;
     double tow;
-    char sat[32],mp[32],tstr[64],*tlabel,*code=ObsTypeText.c_str()+1;
+	char sat[32],mp[32],tstr[64],*code=ObsTypeText.c_str()+1;
+	const char *tlabel;
     int i,j,k,week;
     
     trace(3,"SaveSnrMp: file=%s\n",file.c_str());

@@ -1221,7 +1221,7 @@ void __fastcall TMainForm::LoadOpt(void)
     OutputFile->Items  =ReadList(ini,"hist","outputfile");
 
     PosMode            =ini->ReadInteger("opt","posmode",		prcopt.mode);
-    Freq               =ini->ReadInteger("opt","freq",          prcopt.nf);
+    Freq               =ini->ReadInteger("opt","freq",          prcopt.nf-1);
     Solution           =ini->ReadInteger("opt","solution",      prcopt.soltype);
     ElMask             =ini->ReadFloat  ("opt","elmask",		prcopt.elmin);
     SnrMask.ena[0]     =ini->ReadInteger("opt","snrmask_ena1",  prcopt.snrmask.ena[0]);
@@ -1230,7 +1230,7 @@ void __fastcall TMainForm::LoadOpt(void)
         SnrMask.mask[i][j]=
             ini->ReadFloat("opt",s.sprintf("snrmask_%d_%d",i+1,j+1),35.0);
     }
-    IonoOpt            =ini->ReadInteger("opt","ionoopt",     	prcopt.ionoop);
+    IonoOpt            =ini->ReadInteger("opt","ionoopt",     	prcopt.ionoopt);
     TropOpt            =ini->ReadInteger("opt","tropopt",     	prcopt.tropopt);
     RcvBiasEst         =ini->ReadInteger("opt","rcvbiasest",    0);
     DynamicModel       =ini->ReadInteger("opt","dynamicmodel",  prcopt.dynamics);
@@ -1254,7 +1254,7 @@ void __fastcall TMainForm::LoadOpt(void)
     ThresAR3           =ini->ReadFloat  ("opt","thresar3",    	prcopt.thresar[2]);
     LockCntFixAmb      =ini->ReadInteger("opt","lockcntfixamb", prcopt.minlock);
     FixCntHoldAmb      =ini->ReadInteger("opt","fixcntholdamb", prcopt.minfix);
-    ElMaskAR           =ini->ReadFloat  ("opt","elmaskar",     	prcopt.elmaskar));
+    ElMaskAR           =ini->ReadFloat  ("opt","elmaskar",     	prcopt.elmaskar);
     ElMaskHold         =ini->ReadFloat  ("opt","elmaskhold",   	prcopt.elmaskhold);
     OutCntResetAmb     =ini->ReadInteger("opt","outcntresetbias",prcopt.maxout);
     SlipThres          =ini->ReadFloat  ("opt","slipthres",   	prcopt.thresslip);
@@ -1264,7 +1264,7 @@ void __fastcall TMainForm::LoadOpt(void)
     GainHoldAmb        =ini->ReadFloat  ("opt","gainholdamb", 	prcopt.gainholdamb);
     RejectGdop         =ini->ReadFloat  ("opt","rejectgdop",  	prcopt.maxgdop);
     ARIter             =ini->ReadInteger("opt","ariter",        prcopt.armaxiter);
-    NumIter            =ini->ReadInteger("opt","numiter",       prcopt.niter));
+    NumIter            =ini->ReadInteger("opt","numiter",       prcopt.niter);
     MinFixSats         =ini->ReadInteger("opt","minfixsats",    prcopt.minfixsats);
     MinHoldSats        =ini->ReadInteger("opt","minholdsats",   prcopt.minholdsats);
     MinDropSats        =ini->ReadInteger("opt","mindropsats",   prcopt.mindropsats);
@@ -1283,7 +1283,7 @@ void __fastcall TMainForm::LoadOpt(void)
     FieldSep           =ini->ReadString ("opt","fieldsep",      solopt.sep);
     OutputHead         =ini->ReadInteger("opt","outputhead",    solopt.outhead);
     OutputOpt          =ini->ReadInteger("opt","outputopt",     solopt.outopt);
-    OutputSingle       =ini->ReadInteger("opt","outputsingle",  solopt.outsingle);
+    OutputSingle       =ini->ReadInteger("opt","outputsingle",  prcopt.outsingle);
     MaxSolStd          =ini->ReadFloat  ("opt","maxsolstd",    	solopt.maxsolstd);
     OutputDatum        =ini->ReadInteger("opt","outputdatum",   solopt.datum);
     OutputHeight       =ini->ReadInteger("opt","outputheight",  solopt.height);
@@ -1306,7 +1306,7 @@ void __fastcall TMainForm::LoadOpt(void)
 	PrNoise5           =ini->ReadFloat  ("opt","prnoise5",    	prcopt.prn[4]);
     
     RovPosType         =ini->ReadInteger("opt","rovpostype",    prcopt.rovpos);
-    RefPosType         =ini->ReadInteger("opt","refpostype",    prcopt.refpos);
+    RefPosType         =ini->ReadInteger("opt","refpostype",    prcopt.refpos+5);
     RovPos[0]          =ini->ReadFloat  ("opt","rovpos1",      	prcopt.ru[0]);
     RovPos[1]          =ini->ReadFloat  ("opt","rovpos2",     	prcopt.ru[1]);
     RovPos[2]          =ini->ReadFloat  ("opt","rovpos3",      	prcopt.ru[2]);
