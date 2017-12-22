@@ -183,7 +183,7 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
     for (int i=1;i<argc;i++) {
         if (!strcmp(argv[i],"-i")&&i+1<argc) IniFile=argv[++i];
     }
-    LoadOpt();
+	LoadOpt();
     
     for (int i=1;i<argc;i++) {
         if (!strcmp(argv[i],"-t")&&i+1<argc) Caption=argv[++i];
@@ -1130,7 +1130,7 @@ void __fastcall TMainForm::SvrStart(void)
     gtime_t time=timeget();
     pcvs_t pcvr={0},pcvs={0};
     pcv_t *pcv;
-    
+
     trace(3,"SvrStart\n");
     
     Message->Caption=""; Message->Parent->Hint="";
@@ -1142,7 +1142,7 @@ void __fastcall TMainForm::SvrStart(void)
         PrcOpt.ru[2]=RovPos[2];
     }
     else { // RTCM position
-        PrcOpt.rovpos=POSOPT_RTCM;
+		PrcOpt.rovpos=POSOPT_RTCM;
         for (i=0;i<3;i++) PrcOpt.ru[i]=0.0;
     }
     if (RefPosTypeF<=2) { // LLH,XYZ
@@ -1155,7 +1155,7 @@ void __fastcall TMainForm::SvrStart(void)
         PrcOpt.refpos=POSOPT_RTCM;
         for (i=0;i<3;i++) PrcOpt.rb[i]=0.0;
     }
-    else if (RefPosTypeF==4) { // raw position
+	else if (RefPosTypeF==4) { // raw position
         PrcOpt.refpos=POSOPT_RAW;
         for (i=0;i<3;i++) PrcOpt.rb[i]=0.0;
     }
@@ -2416,12 +2416,18 @@ void __fastcall TMainForm::SetTrayIcon(int index)
 // load option from ini file ------------------------------------------------
 void __fastcall TMainForm::LoadOpt(void)
 {
+    prcopt_t prcopt;
+    solopt_t solopt;
+    filopt_t filopt;
+    resetsysopts();
+	getsysopts(&prcopt, &solopt, 1, &filopt);
+
     TIniFile *ini=new TIniFile(IniFile);
-    AnsiString s;
+	AnsiString s;
     int i,j,no,strno[]={0,1,6,2,3,4,5,7};
     char *p;
     
-    trace(3,"LoadOpt\n");
+	trace(3,"LoadOpt\n");
     
     for (i=0;i<8;i++) {
         no=strno[i];
@@ -2446,108 +2452,108 @@ void __fastcall TMainForm::LoadOpt(void)
         CmdsTcp[i][j]=ini->ReadString("tcpip",s.sprintf("cmd_%d_%d",i,j),"");
         CmdEnaTcp[i][j]=ini->ReadInteger("tcpip",s.sprintf("cmdena_%d_%d",i,j),0);
         for (p=CmdsTcp[i][j].c_str();*p;p++) {
-            if ((p=strstr(p,"@@"))) strncpy(p,"\r\n",2); else break;
+			if ((p=strstr(p,"@@"))) strncpy(p,"\r\n",2); else break;
         }
     }
-    PrcOpt.mode     =ini->ReadInteger("prcopt", "mode",            0);
-    PrcOpt.nf       =ini->ReadInteger("prcopt", "nf",              2);
-    PrcOpt.elmin    =ini->ReadFloat  ("prcopt", "elmin",    15.0*D2R);
-    PrcOpt.snrmask.ena[0]=ini->ReadInteger("prcopt","snrmask_ena1",0);
-    PrcOpt.snrmask.ena[1]=ini->ReadInteger("prcopt","snrmask_ena2",0);
+	PrcOpt.mode     =ini->ReadInteger("prcopt", "mode",				prcopt.mode);
+	PrcOpt.nf       =ini->ReadInteger("prcopt", "nf",              	prcopt.nf);
+	PrcOpt.elmin    =ini->ReadFloat  ("prcopt", "elmin",    		prcopt.elmin);
+	PrcOpt.snrmask.ena[0]=ini->ReadInteger("prcopt","snrmask_ena1",	prcopt.snrmask.ena[0]);
+	PrcOpt.snrmask.ena[1]=ini->ReadInteger("prcopt","snrmask_ena2",	prcopt.snrmask.ena[1]);
     for (i=0;i<NFREQ;i++) for (j=0;j<9;j++) {
         PrcOpt.snrmask.mask[i][j]=
-            ini->ReadFloat("prcopt",s.sprintf("snrmask_%d_%d",i+1,j+1),0.0);
+			ini->ReadFloat("prcopt",s.sprintf("snrmask_%d_%d",i+1,j+1),35.0);
     }
-    PrcOpt.dynamics =ini->ReadInteger("prcopt", "dynamics",        0);
-    PrcOpt.tidecorr =ini->ReadInteger("prcopt", "tidecorr",        0);
-    PrcOpt.modear   =ini->ReadInteger("prcopt", "modear",          1);
-    PrcOpt.glomodear=ini->ReadInteger("prcopt", "glomodear",       0);
-    PrcOpt.bdsmodear=ini->ReadInteger("prcopt", "bdsmodear",       0);
-    PrcOpt.maxout   =ini->ReadInteger("prcopt", "maxout",          5);
-    PrcOpt.minlock  =ini->ReadInteger("prcopt", "minlock",         0);
-    PrcOpt.minfix   =ini->ReadInteger("prcopt", "minfix",         10);
-    PrcOpt.ionoopt  =ini->ReadInteger("prcopt", "ionoopt",IONOOPT_BRDC);
-    PrcOpt.tropopt  =ini->ReadInteger("prcopt", "tropopt",TROPOPT_SAAS);
-    PrcOpt.sateph   =ini->ReadInteger("prcopt", "ephopt",  EPHOPT_BRDC);
-    PrcOpt.armaxiter=ini->ReadInteger("prcopt", "ariter",          1);
-    PrcOpt.minfixsats=ini->ReadInteger("prcopt", "minfixsats",     2);
-    PrcOpt.minholdsats=ini->ReadInteger("prcopt", "minholdsats",   2);
-    PrcOpt.mindropsats=ini->ReadInteger("prcopt", "mindropsats",  20);
-    PrcOpt.niter    =ini->ReadInteger("prcopt", "niter",           1);
-    PrcOpt.eratio[0]=ini->ReadFloat  ("prcopt", "eratio0",     100.0);
-    PrcOpt.eratio[1]=ini->ReadFloat  ("prcopt", "eratio1",     100.0);
-    PrcOpt.err[1]   =ini->ReadFloat  ("prcopt", "err1",        0.003);
-    PrcOpt.err[2]   =ini->ReadFloat  ("prcopt", "err2",        0.003);
-    PrcOpt.err[3]   =ini->ReadFloat  ("prcopt", "err3",          0.0);
-    PrcOpt.err[4]   =ini->ReadFloat  ("prcopt", "err4",          1.0);
-    PrcOpt.prn[0]   =ini->ReadFloat  ("prcopt", "prn0",         1E-4);
-    PrcOpt.prn[1]   =ini->ReadFloat  ("prcopt", "prn1",         1E-3);
-    PrcOpt.prn[2]   =ini->ReadFloat  ("prcopt", "prn2",         1E-4);
-    PrcOpt.prn[3]   =ini->ReadFloat  ("prcopt", "prn3",         10.0);
-    PrcOpt.prn[4]   =ini->ReadFloat  ("prcopt", "prn4",         10.0);
-    PrcOpt.sclkstab =ini->ReadFloat  ("prcopt", "sclkstab",    5E-12);
-    PrcOpt.thresar[0]=ini->ReadFloat ("prcopt", "thresar",       3.0);
-    PrcOpt.thresar[1]=ini->ReadFloat ("prcopt", "thresar1",     0.99);
-    PrcOpt.elmaskar =ini->ReadFloat  ("prcopt", "elmaskar",      0.0);
-    PrcOpt.elmaskhold=ini->ReadFloat ("prcopt", "elmaskhold",    0.0);
-    PrcOpt.thresslip=ini->ReadFloat  ("prcopt", "thresslip",    0.05);
-    PrcOpt.maxtdiff =ini->ReadFloat  ("prcopt", "maxtdiff",     30.0);
-    PrcOpt.maxgdop  =ini->ReadFloat  ("prcopt", "maxgdop",      30.0);
-    PrcOpt.maxinno  =ini->ReadFloat  ("prcopt", "maxinno",      30.0);
-    PrcOpt.varholdamb=ini->ReadFloat ("prcopt", "varholdamb",  0.001);
-    PrcOpt.gainholdamb=ini->ReadFloat("prcopt", "gainholdamb",  0.01);
-    PrcOpt.syncsol  =ini->ReadInteger("prcopt", "syncsol",         0);
-    PrcOpt.arfilter =ini->ReadInteger("prcopt", "arfilter",        0);
-    PrcOpt.rcvstds  =ini->ReadInteger("prcopt", "rcvstds",        0);
-    ExSats          =ini->ReadString ("prcopt", "exsats",         "");
-    PrcOpt.navsys   =ini->ReadInteger("prcopt", "navsys",    SYS_GPS);
-    PrcOpt.posopt[0]=ini->ReadInteger("prcopt", "posopt1",         0);
-    PrcOpt.posopt[1]=ini->ReadInteger("prcopt", "posopt2",         0);
-    PrcOpt.posopt[2]=ini->ReadInteger("prcopt", "posopt3",         0);
-    PrcOpt.posopt[3]=ini->ReadInteger("prcopt", "posopt4",         0);
-    PrcOpt.posopt[4]=ini->ReadInteger("prcopt", "posopt5",         0);
-    PrcOpt.posopt[5]=ini->ReadInteger("prcopt", "posopt6",         0);
-    PrcOpt.maxaveep =ini->ReadInteger("prcopt", "maxaveep",     3600);
-    PrcOpt.initrst  =ini->ReadInteger("prcopt", "initrst",         1);
-    
-    BaselineC       =ini->ReadInteger("prcopt", "baselinec",       0);
-    Baseline[0]     =ini->ReadFloat  ("prcopt", "baseline1",     0.0);
-    Baseline[1]     =ini->ReadFloat  ("prcopt", "baseline2",     0.0);
-    
-    SolOpt.posf     =ini->ReadInteger("solopt", "posf",            0);
-    SolOpt.times    =ini->ReadInteger("solopt", "times",           0);
-    SolOpt.timef    =ini->ReadInteger("solopt", "timef",           1);
-    SolOpt.timeu    =ini->ReadInteger("solopt", "timeu",           3);
-    SolOpt.degf     =ini->ReadInteger("solopt", "degf",            0);
-    s=ini->ReadString("solopt","sep"," ");
-    strcpy(SolOpt.sep,s.c_str());
-    SolOpt.outhead  =ini->ReadInteger("solopt", "outhead",         0);
-    SolOpt.outopt   =ini->ReadInteger("solopt", "outopt",          0);
-    PrcOpt.outsingle=ini->ReadInteger("prcopt", "outsingle",       0);
-    SolOpt.maxsolstd=ini->ReadFloat  ("solopt", "maxsolstd",     0.0);
-    SolOpt.datum    =ini->ReadInteger("solopt", "datum",           0);
-    SolOpt.height   =ini->ReadInteger("solopt", "height",          0);
-    SolOpt.geoid    =ini->ReadInteger("solopt", "geoid",           0);
-    SolOpt.nmeaintv[0]=ini->ReadFloat("solopt", "nmeaintv1",     0.0);
-    SolOpt.nmeaintv[1]=ini->ReadFloat("solopt", "nmeaintv2",     0.0);
-    DebugStatusF    =ini->ReadInteger("setting","debugstatus",     0);
-    DebugTraceF     =ini->ReadInteger("setting","debugtrace",      0);
-    
-    RovPosTypeF     =ini->ReadInteger("setting","rovpostype",      0);
-    RefPosTypeF     =ini->ReadInteger("setting","refpostype",      0);
-    RovAntPcvF      =ini->ReadInteger("setting","rovantpcv",       0);
-    RefAntPcvF      =ini->ReadInteger("setting","refantpcv",       0);
-    RovAntF         =ini->ReadString ("setting","rovant",         "");
-    RefAntF         =ini->ReadString ("setting","refant",         "");
-    SatPcvFileF     =ini->ReadString ("setting","satpcvfile",     "");
-    AntPcvFileF     =ini->ReadString ("setting","antpcvfile",     "");
-    StaPosFileF     =ini->ReadString ("setting","staposfile",     "");
-    GeoidDataFileF  =ini->ReadString ("setting","geoiddatafile",  "");
-    DCBFileF        =ini->ReadString ("setting","dcbfile",        "");
-    EOPFileF        =ini->ReadString ("setting","eopfile",        "");
-    TLEFileF        =ini->ReadString ("setting","tlefile",        "");
-    TLESatFileF     =ini->ReadString ("setting","tlesatfile",     "");
-    LocalDirectory  =ini->ReadString ("setting","localdirectory","C:\\Temp");
+	PrcOpt.dynamics =ini->ReadInteger("prcopt", "dynamics",        	prcopt.dynamics);
+	PrcOpt.tidecorr =ini->ReadInteger("prcopt", "tidecorr",        	prcopt.tidecorr);
+	PrcOpt.modear   =ini->ReadInteger("prcopt", "modear",          	prcopt.modear);
+	PrcOpt.glomodear=ini->ReadInteger("prcopt", "glomodear",       	prcopt.glomodear);
+	PrcOpt.bdsmodear=ini->ReadInteger("prcopt", "bdsmodear",       	prcopt.bdsmodear);
+	PrcOpt.maxout   =ini->ReadInteger("prcopt", "maxout",          	prcopt.maxout);
+	PrcOpt.minlock  =ini->ReadInteger("prcopt", "minlock",         	prcopt.maxtdiff);
+	PrcOpt.minfix   =ini->ReadInteger("prcopt", "minfix",          	prcopt.minfix);
+	PrcOpt.ionoopt  =ini->ReadInteger("prcopt", "ionoopt",			prcopt.ionoopt);
+	PrcOpt.tropopt  =ini->ReadInteger("prcopt", "tropopt",			prcopt.tropopt);
+	PrcOpt.sateph   =ini->ReadInteger("prcopt", "ephopt",  			prcopt.sateph);
+	PrcOpt.armaxiter=ini->ReadInteger("prcopt", "ariter",          	prcopt.armaxiter);
+	PrcOpt.minfixsats=ini->ReadInteger("prcopt", "minfixsats",     	prcopt.minfixsats);
+	PrcOpt.minholdsats=ini->ReadInteger("prcopt", "minholdsats",   	prcopt.minholdsats);
+	PrcOpt.mindropsats=ini->ReadInteger("prcopt", "mindropsats",  	prcopt.mindropsats);
+	PrcOpt.niter    =ini->ReadInteger("prcopt", "niter",           	prcopt.niter);
+	PrcOpt.eratio[0]=ini->ReadFloat  ("prcopt", "eratio0",     		prcopt.eratio[0]);
+	PrcOpt.eratio[1]=ini->ReadFloat  ("prcopt", "eratio1",     		prcopt.eratio[1]);
+	PrcOpt.err[1]   =ini->ReadFloat  ("prcopt", "err1",        		prcopt.err[1]);
+	PrcOpt.err[2]   =ini->ReadFloat  ("prcopt", "err2",        		prcopt.err[2]);
+	PrcOpt.err[3]   =ini->ReadFloat  ("prcopt", "err3",          	prcopt.err[3]);
+	PrcOpt.err[4]   =ini->ReadFloat  ("prcopt", "err4",          	prcopt.err[4]);
+	PrcOpt.prn[0]   =ini->ReadFloat  ("prcopt", "prn0",         	prcopt.prn[0]);
+	PrcOpt.prn[1]   =ini->ReadFloat  ("prcopt", "prn1",         	prcopt.prn[1]);
+	PrcOpt.prn[2]   =ini->ReadFloat  ("prcopt", "prn2",         	prcopt.prn[2]);
+	PrcOpt.prn[3]   =ini->ReadFloat  ("prcopt", "prn3",         	prcopt.prn[3]);
+	PrcOpt.prn[4]   =ini->ReadFloat  ("prcopt", "prn4",         	prcopt.prn[4]);
+	PrcOpt.sclkstab =ini->ReadFloat  ("prcopt", "sclkstab",    		prcopt.sclkstab);
+	PrcOpt.thresar[0]=ini->ReadFloat ("prcopt", "thresar",       	prcopt.thresar[0]);
+	PrcOpt.thresar[1]=ini->ReadFloat ("prcopt", "thresar1",     	prcopt.thresar[1]);
+	PrcOpt.elmaskar =ini->ReadFloat  ("prcopt", "elmaskar",      	prcopt.elmaskar);
+	PrcOpt.elmaskhold=ini->ReadFloat ("prcopt", "elmaskhold",    	prcopt.elmaskhold);
+	PrcOpt.thresslip=ini->ReadFloat  ("prcopt", "thresslip",    	prcopt.thresslip);
+	PrcOpt.maxtdiff =ini->ReadFloat  ("prcopt", "maxtdiff",     	prcopt.maxtdiff);
+	PrcOpt.maxgdop  =ini->ReadFloat  ("prcopt", "maxgdop",      	prcopt.maxgdop);
+	PrcOpt.maxinno  =ini->ReadFloat  ("prcopt", "maxinno",      	prcopt.maxinno);
+	PrcOpt.varholdamb=ini->ReadFloat ("prcopt", "varholdamb",  		prcopt.varholdamb);
+	PrcOpt.gainholdamb=ini->ReadFloat("prcopt", "gainholdamb",  	prcopt.gainholdamb);
+	PrcOpt.syncsol  =ini->ReadInteger("prcopt", "syncsol",         	prcopt.syncsol);
+	PrcOpt.arfilter =ini->ReadInteger("prcopt", "arfilter",        	prcopt.arfilter);
+	PrcOpt.rcvstds  =ini->ReadInteger("prcopt", "rcvstds",        	prcopt.rcvstds);
+	ExSats          =ini->ReadString ("prcopt", "exsats",         	"");
+	PrcOpt.navsys   =ini->ReadInteger("prcopt", "navsys",    	   	prcopt.navsys);
+	PrcOpt.posopt[0]=ini->ReadInteger("prcopt", "posopt1",         	prcopt.posopt[0]);
+	PrcOpt.posopt[1]=ini->ReadInteger("prcopt", "posopt2",         	prcopt.posopt[1]);
+	PrcOpt.posopt[2]=ini->ReadInteger("prcopt", "posopt3",         	prcopt.posopt[2]);
+	PrcOpt.posopt[3]=ini->ReadInteger("prcopt", "posopt4",         	prcopt.posopt[3]);
+	PrcOpt.posopt[4]=ini->ReadInteger("prcopt", "posopt5",         	prcopt.posopt[4]);
+	PrcOpt.posopt[5]=ini->ReadInteger("prcopt", "posopt6",        	prcopt.posopt[5]);
+	PrcOpt.maxaveep =ini->ReadInteger("prcopt", "maxaveep",     	prcopt.maxaveep);
+	PrcOpt.initrst  =ini->ReadInteger("prcopt", "initrst",         	prcopt.initrst);
+
+	BaselineC       =ini->ReadInteger("prcopt", "baselinec",       	0);
+	Baseline[0]     =ini->ReadFloat  ("prcopt", "baseline1",     	prcopt.baseline[0]);
+	Baseline[1]     =ini->ReadFloat  ("prcopt", "baseline2",     	prcopt.baseline[1]);
+
+	SolOpt.posf     =ini->ReadInteger("solopt", "posf",            	solopt.posf);
+	SolOpt.times    =ini->ReadInteger("solopt", "times",           	solopt.times);
+	SolOpt.timef    =ini->ReadInteger("solopt", "timef",           	solopt.timef);
+	SolOpt.timeu    =ini->ReadInteger("solopt", "timeu",           	solopt.timeu);
+	SolOpt.degf     =ini->ReadInteger("solopt", "degf",            	solopt.degf);
+	s				=ini->ReadString ("solopt","sep",				solopt.sep);
+	strcpy(SolOpt.sep,s.c_str());
+	SolOpt.outhead  =ini->ReadInteger("solopt", "outhead",         	solopt.outhead);
+	SolOpt.outopt   =ini->ReadInteger("solopt", "outopt",          	solopt.outopt);
+	PrcOpt.outsingle=ini->ReadInteger("prcopt", "outsingle",       	prcopt.outsingle);
+	SolOpt.maxsolstd=ini->ReadFloat  ("solopt", "maxsolstd",     	solopt.maxsolstd);
+	SolOpt.datum    =ini->ReadInteger("solopt", "datum",           	solopt.datum);
+	SolOpt.height   =ini->ReadInteger("solopt", "height",          	solopt.height);
+	SolOpt.geoid    =ini->ReadInteger("solopt", "geoid",           	solopt.geoid);
+	SolOpt.nmeaintv[0]=ini->ReadFloat("solopt", "nmeaintv1",     	solopt.nmeaintv[0]);
+	SolOpt.nmeaintv[1]=ini->ReadFloat("solopt", "nmeaintv2",     	solopt.nmeaintv[0]);
+	DebugStatusF    =ini->ReadInteger("setting","debugstatus",     	solopt.sstat);
+	DebugTraceF     =ini->ReadInteger("setting","debugtrace",      	solopt.trace);
+
+	RovPosTypeF     =ini->ReadInteger("setting","rovpostype",      	prcopt.rovpos);
+	RefPosTypeF     =ini->ReadInteger("setting","refpostype",      	3);
+	RovAntPcvF      =ini->ReadInteger("setting","rovantpcv",       	0);
+	RefAntPcvF      =ini->ReadInteger("setting","refantpcv",       	0);
+	RovAntF         =ini->ReadString ("setting","rovant",         	prcopt.anttype[0]);
+	RefAntF         =ini->ReadString ("setting","refant",         	prcopt.anttype[1]);
+	SatPcvFileF     =ini->ReadString ("setting","satpcvfile",     	filopt.satantp);
+	AntPcvFileF     =ini->ReadString ("setting","antpcvfile",     	filopt.rcvantp);
+	StaPosFileF     =ini->ReadString ("setting","staposfile",     	filopt.stapos);
+	GeoidDataFileF  =ini->ReadString ("setting","geoiddatafile",  	filopt.geoid);
+	DCBFileF        =ini->ReadString ("setting","dcbfile",        	filopt.dcb);
+	EOPFileF        =ini->ReadString ("setting","eopfile",        	filopt.eop);
+	TLEFileF        =ini->ReadString ("setting","tlefile",        	"");
+	TLESatFileF     =ini->ReadString ("setting","tlesatfile",     	"");
+	LocalDirectory  =ini->ReadString ("setting","localdirectory","C:\\Temp");
     
     SvrCycle        =ini->ReadInteger("setting","svrcycle",       10);
     TimeoutTime     =ini->ReadInteger("setting","timeouttime", 10000);
@@ -2606,7 +2612,7 @@ void __fastcall TMainForm::LoadOpt(void)
     
     for (i=0;i<3;i++) {
         RovAntDel[i]=ini->ReadFloat("setting",s.sprintf("rovantdel_%d",i),0.0);
-        RefAntDel[i]=ini->ReadFloat("setting",s.sprintf("refantdel_%d",i),0.0);
+		RefAntDel[i]=ini->ReadFloat("setting",s.sprintf("refantdel_%d",i),0.0);
         RovPos   [i]=ini->ReadFloat("setting",s.sprintf("rovpos_%d",   i),0.0);
         RefPos   [i]=ini->ReadFloat("setting",s.sprintf("refpos_%d",   i),0.0);
     }
